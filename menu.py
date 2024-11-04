@@ -25,40 +25,57 @@ def show_all_handbook_rows(handbook: list, sort_by_field="name") -> str:
     pretty_table.align["address"] = "l"
 
     # place all lines from the dictionary into a table
-    for raw in handbook:
-        pretty_table.add_row(list(raw.values()))
+    for contact in handbook:
+        pretty_table.add_row(list(contact.values()))
 
     return pretty_table.get_string(sortby=sort_by_field)
 
 
-def add_raw(handbook: list, raw: dict):
-
+def add_raw(handbook: list, new_contact: dict):
     expected_field_names = {"name", "phone", "email", "address"}
 
-    if isinstance(raw, dict):
-        missing_keys = expected_field_names - raw.keys()
-        extra_keys = raw.keys() - expected_field_names
+    if isinstance(new_contact, dict):
+        missing_keys = expected_field_names - new_contact.keys()
+        extra_keys = new_contact.keys() - expected_field_names
 
         if missing_keys:
             print(f"Ошибка при записи контакта. Отсутствуют ключи: {missing_keys}")
         elif extra_keys:
-            print(f"Ошибка при записи контакта.Лишние ключи: {extra_keys}")
+            print(f"Ошибка при записи контакта. Лишние ключи: {extra_keys}")
         else:
-            handbook.append(raw)
+            handbook.append(new_contact)
     else:
         print(f"""
-        Для записи контакта в справочник используется словарь (dict)
-        В функции передан: {type(raw)}
+        В функции передан: {type(new_contact)}
+        Требуется dict
         """)
 
 
 def find_raws(handbook: list, search_string: str, find_by_field="name") -> list:
-    result = [raw for raw in handbook if search_string in raw[find_by_field]]
+    result = [contact for contact in handbook if search_string in contact[find_by_field]]
     return result
 
 
-def update_raw():
-    pass
+def update_raw(handbook: list, name: str, update_contact: dict) -> bool:
+    is_update_contact = False
+    expected_field_names = {"name", "phone", "email", "address"}
+
+    if isinstance(update_contact, dict):
+        extra_keys = update_contact.keys() - expected_field_names
+
+        if extra_keys:
+            print(f"Ошибка при обновлении контакта. Лишние ключи: {extra_keys}")
+        else:
+            for contact in handbook:
+                if contact["name"] == name:
+                    contact.update(update_contact)
+                    is_update_contact = True
+    else:
+        print(f"""
+        В функции передан: {type(update_contact)}
+        Требуется dict
+        """)
+    return is_update_contact
 
 
 def delete_raw():
@@ -74,9 +91,12 @@ hndbook = open_handbook("handbook.json")
 
 # Запись строки в справочник
 add_raw(hndbook, {"name": "ЯТест Тестов", "phone": "+7 777 777-77-77", "email": "test.testov@example.com", "address": "кукуево"})
-# add_raw(hndbook, ["Тест Тестов", "+7 777 777-77-77", "test.testov@example.com", "кукуево"])
-
 print(show_all_handbook_rows(hndbook))
 
-find_contacts = find_raws(hndbook, "Калуга", "address")
+find_contacts = find_raws(hndbook, "ЯТест")
 print(show_all_handbook_rows(find_contacts))
+
+is_upd = update_raw(hndbook, "ЯТест Тестов", {"phone": "+7 777 777-77-78", "email": "test.testov@example.com", "address": "кукуево"})
+print(show_all_handbook_rows(hndbook))
+print(is_upd)
+
