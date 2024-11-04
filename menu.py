@@ -16,7 +16,7 @@ def save_handbook():
     pass
 
 
-def show_all_handbook_rows(handbook: list, sort_by_field=None) -> str:
+def show_all_handbook_rows(handbook: list, sort_by_field="name") -> str:
     pretty_table = PrettyTable()
 
     # set table field names
@@ -25,8 +25,8 @@ def show_all_handbook_rows(handbook: list, sort_by_field=None) -> str:
     pretty_table.align["address"] = "l"
 
     # place all lines from the dictionary into a table
-    for hb in handbook:
-        pretty_table.add_row(list(hb.values()))
+    for raw in handbook:
+        pretty_table.add_row(list(raw.values()))
 
     return pretty_table.get_string(sortby=sort_by_field)
 
@@ -51,11 +51,10 @@ def add_raw(handbook: list, raw: dict):
         В функции передан: {type(raw)}
         """)
 
-        # handbook.append(raw)
 
-
-def find_raw():
-    pass
+def find_raws(handbook: list, search_string: str, find_by_field="name") -> list:
+    result = [raw for raw in handbook if search_string in raw[find_by_field]]
+    return result
 
 
 def update_raw():
@@ -77,4 +76,7 @@ hndbook = open_handbook("handbook.json")
 add_raw(hndbook, {"name": "ЯТест Тестов", "phone": "+7 777 777-77-77", "email": "test.testov@example.com", "address": "кукуево"})
 # add_raw(hndbook, ["Тест Тестов", "+7 777 777-77-77", "test.testov@example.com", "кукуево"])
 
-print(show_all_handbook_rows(hndbook, "name"))
+print(show_all_handbook_rows(hndbook))
+
+find_contacts = find_raws(hndbook, "Калуга", "address")
+print(show_all_handbook_rows(find_contacts))
