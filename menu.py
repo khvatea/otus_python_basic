@@ -1,14 +1,13 @@
 import json
-from dis import pretty_flags
-
 from prettytable import PrettyTable
 
 
 def open_handbook(handbook_file: str) -> list:
-    """ Открыть справочкник телефонной книги
-        :param handbook_file: JSON файл, содержащий записи контактов телефонной книги
-        :return: Объект JSON, со справочником контактов
-        """
+    """
+    Открыть справочкник телефонной книги
+    :param handbook_file: JSON файл, содержащий записи контактов телефонной книги
+    :return: Объект list, с контактами в формате dict
+    """
     with open(handbook_file, "r") as handbook:
         return json.load(handbook)
 
@@ -32,8 +31,27 @@ def show_all_handbook_rows(handbook: list, sort_by_field=None) -> str:
     return pretty_table.get_string(sortby=sort_by_field)
 
 
-def add_raw():
-    pass
+def add_raw(handbook: list, raw: dict):
+
+    expected_field_names = {"name", "phone", "email", "address"}
+
+    if isinstance(raw, dict):
+        missing_keys = expected_field_names - raw.keys()
+        extra_keys = raw.keys() - expected_field_names
+
+        if missing_keys:
+            print(f"Ошибка при записи контакта. Отсутствуют ключи: {missing_keys}")
+        elif extra_keys:
+            print(f"Ошибка при записи контакта.Лишние ключи: {extra_keys}")
+        else:
+            handbook.append(raw)
+    else:
+        print(f"""
+        Для записи контакта в справочник используется словарь (dict)
+        В функции передан: {type(raw)}
+        """)
+
+        # handbook.append(raw)
 
 
 def find_raw():
@@ -53,4 +71,10 @@ def delete_raw():
 hndbook = open_handbook("handbook.json")
 
 # Выводим записи справочника в таблице
+# print(show_all_handbook_rows(hndbook, "name"))
+
+# Запись строки в справочник
+add_raw(hndbook, {"name": "ЯТест Тестов", "phone": "+7 777 777-77-77", "email": "test.testov@example.com", "address": "кукуево"})
+# add_raw(hndbook, ["Тест Тестов", "+7 777 777-77-77", "test.testov@example.com", "кукуево"])
+
 print(show_all_handbook_rows(hndbook, "name"))
