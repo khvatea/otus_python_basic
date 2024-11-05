@@ -1,4 +1,5 @@
 import json
+
 from prettytable import PrettyTable
 
 
@@ -8,12 +9,13 @@ def open_handbook(handbook_file: str) -> list:
     :param handbook_file: JSON файл, содержащий записи контактов телефонной книги
     :return: Объект list, с контактами в формате dict
     """
-    with open(handbook_file, "r") as handbook:
-        return json.load(handbook)
+    with open(handbook_file, "r", encoding='utf8') as handbook_json:
+        return json.load(handbook_json)
 
 
-def save_handbook():
-    pass
+def save_handbook(handbook_file: str, handbook: list):
+    with open(handbook_file, "w", encoding='utf8') as handbook_json:
+        json.dump(handbook, handbook_json, ensure_ascii=False, indent=4)
 
 
 def show_all_handbook_rows(handbook: list, sort_by_field="name") -> str:
@@ -56,8 +58,7 @@ def find_raws(handbook: list, search_string: str, find_by_field="name") -> list:
     return result
 
 
-def update_raw(handbook: list, name: str, update_contact: dict) -> bool:
-    is_update_contact = False
+def update_raw(handbook: list, name: str, update_contact: dict):
     expected_field_names = {"name", "phone", "email", "address"}
 
     if isinstance(update_contact, dict):
@@ -69,34 +70,38 @@ def update_raw(handbook: list, name: str, update_contact: dict) -> bool:
             for contact in handbook:
                 if contact["name"] == name:
                     contact.update(update_contact)
-                    is_update_contact = True
     else:
         print(f"""
         В функции передан: {type(update_contact)}
         Требуется dict
         """)
-    return is_update_contact
 
 
-def delete_raw():
-    pass
+def delete_raw(handbook: list, name: str):
+    for contact in handbook:
+        # print(contact["name"])
+        if contact["name"] == name:
+            handbook.remove(contact)
 
 
 ######################
-# Считываем файл и записываем в объект JSON
-hndbook = open_handbook("handbook.json")
-
-# Выводим записи справочника в таблице
-# print(show_all_handbook_rows(hndbook, "name"))
-
-# Запись строки в справочник
-add_raw(hndbook, {"name": "ЯТест Тестов", "phone": "+7 777 777-77-77", "email": "test.testov@example.com", "address": "кукуево"})
-print(show_all_handbook_rows(hndbook))
-
-find_contacts = find_raws(hndbook, "ЯТест")
-print(show_all_handbook_rows(find_contacts))
-
-is_upd = update_raw(hndbook, "ЯТест Тестов", {"phone": "+7 777 777-77-78", "email": "test.testov@example.com", "address": "кукуево"})
-print(show_all_handbook_rows(hndbook))
-print(is_upd)
-
+# # Считываем файл и записываем в объект JSON
+# hndbook = open_handbook("handbook.json")
+#
+# # Выводим записи справочника в таблице
+# # print(show_all_handbook_rows(hndbook, "name"))
+#
+# # Запись строки в справочник
+# add_raw(hndbook, {"name": "ЯТест Тестов", "phone": "+7 777 777-77-77", "email": "test.testov@example.com", "address": "кукуево"})
+# print(show_all_handbook_rows(hndbook))
+#
+# find_contacts = find_raws(hndbook, "ЯТест")
+# print(show_all_handbook_rows(find_contacts))
+#
+# is_upd = update_raw(hndbook, "ЯТест Тестов", {"phone": "+7 777 777-77-78", "email": "test.testov@example.com", "address": "кукуево"})
+# print(show_all_handbook_rows(hndbook))
+#
+# delete_raw(hndbook, "Татьяна Супрун")
+# print(show_all_handbook_rows(hndbook))
+#
+# save_handbook("handbook_1.json", hndbook)
