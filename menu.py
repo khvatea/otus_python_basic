@@ -1,9 +1,10 @@
 import json
-
+import sys
 from prettytable import PrettyTable
+import difflib
 
 
-def open_handbook(handbook_file: str) -> list:
+def handbook_open(handbook_file: str) -> list:
     """
     Открыть справочкник телефонной книги
     :param handbook_file: JSON файл, содержащий записи контактов телефонной книги
@@ -18,7 +19,7 @@ def save_handbook(handbook_file: str, handbook: list):
         json.dump(handbook, handbook_json, ensure_ascii=False, indent=4)
 
 
-def show_all_handbook_rows(handbook: list, sort_by_field="name") -> str:
+def handbook_show_all_rows(handbook: list, sort_by_field="name") -> str:
     pretty_table = PrettyTable()
 
     # set table field names
@@ -70,6 +71,7 @@ def update_raw(handbook: list, name: str, update_contact: dict):
             for contact in handbook:
                 if contact["name"] == name:
                     contact.update(update_contact)
+                    return contact
     else:
         print(f"""
         В функции передан: {type(update_contact)}
@@ -79,14 +81,35 @@ def update_raw(handbook: list, name: str, update_contact: dict):
 
 def delete_raw(handbook: list, name: str):
     for contact in handbook:
-        # print(contact["name"])
         if contact["name"] == name:
             handbook.remove(contact)
+            return contact
+    return None
 
+def handbooks_compare(handbook_source: str, handbook_buffer: str):
+    with open(handbook_source, "r", encoding='utf8') as source:
+        source_json = json.load(source)
+
+    with open(handbook_buffer, "r", encoding='utf8') as buffer:
+        source_buffer = json.load(buffer)
+
+    ret = []
+    before = [str(raw) for raw in source_json]
+    after = [str(raw) for raw in source_buffer]
+    difflist = difflib.ndiff(before, after)
+
+    for line in difflist:
+        if line.startswith(u'+'):
+            ret.append("\033[3m\033[32m{}\n".format(line))
+        elif line.startswith(u'-'):
+            ret.append("\033[3m\033[31m{}\n".format(line))
+        elif line.startswith(u'?'):
+            ret.append("{}\033[0m".format(line))
+    return ret
 
 ######################
-# # Считываем файл и записываем в объект JSON
-# hndbook = open_handbook("handbook.json")
+# Считываем файл и записываем в объект JSON
+# hndbook = handbook_open("handbook.json")
 #
 # # Выводим записи справочника в таблице
 # # print(show_all_handbook_rows(hndbook, "name"))
@@ -98,10 +121,12 @@ def delete_raw(handbook: list, name: str):
 # find_contacts = find_raws(hndbook, "ЯТест")
 # print(show_all_handbook_rows(find_contacts))
 #
-# is_upd = update_raw(hndbook, "ЯТест Тестов", {"phone": "+7 777 777-77-78", "email": "test.testov@example.com", "address": "кукуево"})
-# print(show_all_handbook_rows(hndbook))
+# print(update_raw(hndbook, "Елизар Сюзян", {"phone": "+7 777 777-77-78", "email": "test.testov@example.com", "address": "кукуево"}))
 #
-# delete_raw(hndbook, "Татьяна Супрун")
-# print(show_all_handbook_rows(hndbook))
+
+# print(delete_raw(hndbook, "Елизар Сюзян"))
 #
 # save_handbook("handbook_1.json", hndbook)
+
+print(handbooks_compare("handbook.json", "handbook_1.json"))
+sys.stdout.writelines(handbooks_compare("handbook.json", "handbook_1.json"))
