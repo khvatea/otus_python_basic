@@ -8,10 +8,11 @@ import difflib
 
 def handbook_open(handbook_file: str) -> list:
     """
-    Открыть справочкник телефонной книги
-    :param handbook_file: JSON файл, содержащий записи контактов телефонной книги
-    :return: Объект list, с контактами в формате dict
+    Open phone book directory from file
+    :param handbook_file: JSON file containing phone book contact entries
+    :return: List object, with contacts in dict format
     """
+    # Create a temporary buffer file
     handbook_buffer_file = "buff.{}".format(handbook_file)
 
     with open(handbook_file, "r", encoding='utf8') as handbook_json:
@@ -24,11 +25,23 @@ def handbook_open(handbook_file: str) -> list:
 
 
 def save_handbook(handbook_file: str, handbook: list):
+    """
+    Save the handbook in JSON format
+    :param handbook_file: path to the handbook JSON file
+    :param handbook: list of handbook entries
+    :return:
+    """
     with open(handbook_file, "w", encoding='utf8') as handbook_json:
         json.dump(handbook, handbook_json, ensure_ascii=False, indent=4)
 
 
 def handbook_show_all_rows(handbook: list, sort_by_field="name") -> str:
+    """
+    Get all handbook entries sorted by the selected field (by default, sorting will be done by the 'name' field)
+    :param handbook: list of handbook entries
+    :param sort_by_field: Table sort field
+    :return: Return string representation of table in current state
+    """
     pretty_table = PrettyTable()
 
     # set table field names
@@ -44,6 +57,12 @@ def handbook_show_all_rows(handbook: list, sort_by_field="name") -> str:
 
 
 def add_raw(handbook: list, new_contact: dict):
+    """
+    Add an entry to the handbook
+    :param handbook: list of handbook entries
+    :param new_contact: New contact in dict format
+    :return:
+    """
     expected_field_names = {"name", "phone", "email", "address"}
 
     if isinstance(new_contact, dict):
@@ -64,11 +83,25 @@ def add_raw(handbook: list, new_contact: dict):
 
 
 def find_raws(handbook: list, search_string: str, find_by_field="name") -> list:
+    """
+    Searching for contacts in the handbook
+    :param handbook: list of handbook entries
+    :param search_string: Search string
+    :param find_by_field: Field to search for
+    :return: Search result
+    """
     result = [contact for contact in handbook if search_string in contact[find_by_field]]
     return result
 
 
-def update_raw(handbook: list, name: str, update_contact: dict):
+def update_raw(handbook: list, name: str, update_contact: dict) -> dict:
+    """
+    Update a handbook entry
+    :param handbook: list of handbook entries
+    :param name: Name of the record that is being updated
+    :param update_contact: Data according to handbook fields in dict format
+    :return: Updated contact
+    """
     for contact in handbook:
         if contact["name"] == name:
             contact.update(update_contact)
@@ -76,13 +109,25 @@ def update_raw(handbook: list, name: str, update_contact: dict):
 
 
 def delete_raw(handbook: list, name: str):
+    """
+    Removing an entry from the handbook
+    :param handbook: list of handbook entries
+    :param name: Name of the entry to be deleted
+    :return: Remove contact in dict format
+    """
     for contact in handbook:
         if contact["name"] == name:
             handbook.remove(contact)
             return contact
     return None
 
-def handbooks_compare(handbook_source: str, handbook_buffer: str):
+def handbooks_compare(handbook_source: str, handbook_buffer: str) -> list:
+    """
+    Comparison of the handbook before and after the change
+    :param handbook_source: Main handbook file
+    :param handbook_buffer: Handbook buffer file
+    :return: List of changes
+    """
     with open(handbook_source, "r", encoding='utf8') as source:
         source_json = json.load(source)
 
@@ -104,31 +149,13 @@ def handbooks_compare(handbook_source: str, handbook_buffer: str):
     return ret
 
 ######################
-# Считываем файл и записываем в объект JSON
-# hndbook = handbook_open("handbook.json")
-#
-# # Выводим записи справочника в таблице
-# # print(show_all_handbook_rows(hndbook, "name"))
-#
-# # Запись строки в справочник
-# add_raw(hndbook, {"name": "ЯТест Тестов", "phone": "+7 777 777-77-77", "email": "test.testov@example.com", "address": "кукуево"})
-# print(show_all_handbook_rows(hndbook))
-#
-# find_contacts = find_raws(hndbook, "ЯТест")
-# print(show_all_handbook_rows(find_contacts))
-#
-# print(update_raw(hndbook, "Елизар Сюзян", {"phone": "+7 777 777-77-78", "email": "test.testov@example.com", "address": "кукуево"}))
-#
-
-# print(delete_raw(hndbook, "Елизар Сюзян"))
-#
-# save_handbook("handbook_1.json", hndbook)
-
-# print(handbooks_compare("handbook.json", "handbook_1.json"))
-# sys.stdout.writelines(handbooks_compare("handbook.json", "handbook_1.json"))
-
-
 def menu(handbook: list, level="0") -> str:
+    """
+    Main menu of the handbook
+    :param handbook: list of handbook entries
+    :param level: Menu level
+    :return: The string received when entering from the console
+    """
     if level == "0":
         print("\nВыберите действие:")
         print("1. Открыть справочник")
@@ -150,6 +177,10 @@ def menu(handbook: list, level="0") -> str:
 
 
 def main():
+    """
+    Interactive processing of the handbook
+    :return:
+    """
     hndbook = []
     hndbook_file = "handbook.json"
     hndbook_buffer_file = "buff.{}".format(hndbook_file)
